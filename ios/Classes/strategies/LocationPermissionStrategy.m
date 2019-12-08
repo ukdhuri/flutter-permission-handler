@@ -31,39 +31,27 @@
 }
 
 - (void)requestPermission:(PermissionGroup)permission completionHandler:(PermissionStatusHandler)completionHandler {
-    PermissionStatus status = [self checkPermissionStatus:permission];
-    if ([CLLocationManager authorizationStatus] == kCLAuthorizationStatusAuthorizedWhenInUse ) {
-        // don't do anything and continue requesting permissions
-    } else if (status != PermissionStatusUnknown) {
-        completionHandler(status);
-    }
+    
     
     _permissionStatusHandler = completionHandler;
     _requestedPermission = permission;
     
     if (permission == PermissionGroupLocation) {
-       if ([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"] != nil) {
+           if ([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"] != nil) {
             [_locationManager requestWhenInUseAuthorization];
         } else {
-            [[NSException exceptionWithName:NSInternalInconsistencyException reason:@"To use location in iOS you need to define NSLocationWhenInUseUsageDescription in the app bundle's Info.plist file" userInfo:nil] raise];
+            [[NSException exceptionWithName:NSInternalInconsistencyException reason:@"To use location in iOS8 you need to define NSLocationWhenInUseUsageDescription in the app bundle's Info.plist file" userInfo:nil] raise];
         }
-    else if (permission == PermissionGroupLocationWhenInUse) {
+    } else if (permission == PermissionGroupLocationWhenInUse) {
         if ([[NSBundle mainBundle] objectForInfoDictionaryKey:@"NSLocationWhenInUseUsageDescription"] != nil) {
             [_locationManager requestWhenInUseAuthorization];
         } else {
-            [[NSException exceptionWithName:NSInternalInconsistencyException reason:@"To use location in iOS you need to define NSLocationWhenInUseUsageDescription in the app bundle's Info.plist file" userInfo:nil] raise];
+            [[NSException exceptionWithName:NSInternalInconsistencyException reason:@"To use location in iOS8 you need to define NSLocationWhenInUseUsageDescription in the app bundle's Info.plist file" userInfo:nil] raise];
         }
     }
 }
 
-// {WARNING}
-// This is called when the location manager is first initialized and raises the following situations:
-// 1. When we first request [PermissionGroupLocationWhenInUse] and then [PermissionGroupLocationAlways]
-//    this will be called when the [CLLocationManager] is first initialized with
-//    [kCLAuthorizationStatusAuthorizedWhenInUse]. As a consequence we send back the result to early.
-// 2. When we first request [PermissionGroupLocationWhenInUse] and then [PermissionGroupLocationAlways]
-//    and the user doesn't allow for [kCLAuthorizationStatusAuthorizedAlways] this method is not called
-//    at all.
+ 
 - (void)locationManager:(CLLocationManager *)manager didChangeAuthorizationStatus:(CLAuthorizationStatus)status {
     if (status == kCLAuthorizationStatusNotDetermined) {
         return;
